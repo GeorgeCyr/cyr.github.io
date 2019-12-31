@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Faster RCNN</title>
+    <url>/2019/12/30/Faster-RCNN/</url>
+    <content><![CDATA[<h2 id="Frist-chapter"><a href="#Frist-chapter" class="headerlink" title="Frist chapter"></a>Frist chapter</h2>]]></content>
+      <categories>
+        <category>Deep learning</category>
+      </categories>
+      <tags>
+        <tag>Deep learning</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Fast RCNN</title>
     <url>/2019/12/30/Fast-RCNN/</url>
     <content><![CDATA[<h3 id="1-前言"><a href="#1-前言" class="headerlink" title="1.前言"></a>1.前言</h3><p>物体检测（object detection）是计算机视觉非常重要的一个领域。在深度学习出现之前，传统方法始终无法处理好物体检测问题，在深度学习方法引入之后，物体检测领域发生了翻天覆地的变化。最著名的是RCNN系列，另外还有YOLO、SSD。这篇文章首先介绍RCNN系列。</p>
