@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Deep learning," />
 
 
 
@@ -79,13 +79,47 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Infinity&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="论文地址：https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;1512.02325源码：https:&#x2F;&#x2F;github.com&#x2F;weiliu89&#x2F;caffe&#x2F;tree&#x2F;ssd  这篇文章提出了一个新的目标检测模型SSD，这是一种 single stage 的检测模型，相比于R-CNN系列模型上要简单许多。 其精度可以与Faster R-CNN相匹敌，而速度达到了惊人的59FPS，速度上完爆 Fster R">
+<meta property="og:type" content="article">
+<meta property="og:title" content="目标检测 SSD 论文笔记">
+<meta property="og:url" content="http://yoursite.com/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/index.html">
 <meta property="og:site_name" content="Infinity&#39;s Blog">
+<meta property="og:description" content="论文地址：https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;1512.02325源码：https:&#x2F;&#x2F;github.com&#x2F;weiliu89&#x2F;caffe&#x2F;tree&#x2F;ssd  这篇文章提出了一个新的目标检测模型SSD，这是一种 single stage 的检测模型，相比于R-CNN系列模型上要简单许多。 其精度可以与Faster R-CNN相匹敌，而速度达到了惊人的59FPS，速度上完爆 Fster R">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/.com//1521700215199.png">
+<meta property="og:image" content="http://yoursite.com/.com//1521700272907.png">
+<meta property="og:image" content="http://yoursite.com/.com//1521700285286.png">
+<meta property="og:image" content="http://yoursite.com/.com//1521723003643.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522219622636.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522220992864-1542376224905.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522221137339-1542376332162.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522221535577-1542376342621.png">
+<meta property="og:image" content="http://yoursite.com/.com//1521723946029-1542376401299.png">
+<meta property="og:image" content="http://yoursite.com/.com//1521723003643-1542376434457.png">
+<meta property="og:image" content="http://yoursite.com/.com//1521698101679.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522208039421.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522217054626.png">
+<meta property="og:image" content="http://yoursite.com/.com//chartflow_VGGNet_SSD_Diagram.png">
+<meta property="og:image" content="http://yoursite.com/.com//chartflow_SSD_diagram_ref.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522224164190.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522226439889.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522226581238.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522226756772.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522226857210.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522226987139.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522227840355.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522231806943.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522227928989.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522229494824.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522231872819.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522234508933.png">
+<meta property="og:image" content="http://yoursite.com/.com//1522234958698.png">
+<meta property="article:published_time" content="2020-01-02T12:49:51.000Z">
+<meta property="article:modified_time" content="2020-01-02T12:51:02.457Z">
 <meta property="article:author" content="Infinity">
+<meta property="article:tag" content="Deep learning">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/.com//1521700215199.png">
 
 
 
@@ -115,13 +149,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="http://yoursite.com/2020/01/02/目标检测-SSD-论文笔记/"/>
 
 
 
 
 
-  <title>Infinity's Blog</title>
+  <title>目标检测 SSD 论文笔记 | Infinity's Blog</title>
   
 
 
@@ -140,8 +174,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -278,9 +311,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -310,9 +343,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/" itemprop="url">目标检测 SSD 论文笔记</a></h1>
+          <h1 class="post-title" itemprop="name headline">目标检测 SSD 论文笔记</h1>
         
 
         <div class="post-meta">
@@ -393,9 +424,7 @@
       
 
       
-        
-          
-            <blockquote>
+        <blockquote>
 <p>论文地址：<a href="https://arxiv.org/abs/1512.02325" target="_blank" rel="noopener">https://arxiv.org/abs/1512.02325</a><br>源码：<a href="https://github.com/weiliu89/caffe/tree/ssd" target="_blank" rel="noopener">https://github.com/weiliu89/caffe/tree/ssd</a></p>
 </blockquote>
 <p>这篇文章提出了一个新的目标检测模型SSD，这是一种 single stage 的检测模型，相比于R-CNN系列模型上要简单许多。</p>
@@ -607,8 +636,6 @@
 <li><a href="https://www.zhihu.com/question/49630217" target="_blank" rel="noopener">知乎：atrous convolution是什么？</a></li>
 </ol>
 
-          
-        
       
     </div>
     
@@ -623,366 +650,36 @@
 
     <footer class="post-footer">
       
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/30/Faster-RCNN/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Infinity">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/profile.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Infinity's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/30/Faster-RCNN/" itemprop="url">Faster RCNN</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-30T21:37:37+08:00">
-                2019-12-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
+        <div class="post-tags">
           
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Deep-learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Deep learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
+            <a href="/tags/Deep-learning/" rel="tag"># Deep learning</a>
           
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-            <div class="post-wordcount">
-              
-                
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Words count in article&#58;</span>
-                
-                <span title="Words count in article">
-                  2
-                </span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Reading time &asymp;</span>
-                
-                <span title="Reading time">
-                  1
-                </span>
-              
-            </div>
-          
-
-          
-
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Frist-chapter"><a href="#Frist-chapter" class="headerlink" title="Frist chapter"></a>Frist chapter</h2>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
       
 
       
       
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
       
 
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/30/Fast-RCNN/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Infinity">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/profile.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Infinity's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/30/Fast-RCNN/" itemprop="url">Fast RCNN</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
             
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-30T16:29:45+08:00">
-                2019-12-30
-              </time>
+              <a href="/2019/12/30/Faster-RCNN/" rel="next" title="Faster RCNN">
+                <i class="fa fa-chevron-left"></i> Faster RCNN
+              </a>
             
+          </div>
 
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
             
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Deep-learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Deep learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-            <div class="post-wordcount">
-              
-                
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Words count in article&#58;</span>
-                
-                <span title="Words count in article">
-                  211
-                </span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Reading time &asymp;</span>
-                
-                <span title="Reading time">
-                  1
-                </span>
-              
-            </div>
-          
-
-          
-
+          </div>
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          
-            <h3 id="1-前言"><a href="#1-前言" class="headerlink" title="1.前言"></a>1.前言</h3><p>物体检测（object detection）是计算机视觉非常重要的一个领域。在深度学习出现之前，传统方法始终无法处理好物体检测问题，在深度学习方法引入之后，物体检测领域发生了翻天覆地的变化。最著名的是RCNN系列，另外还有YOLO、SSD。这篇文章首先介绍RCNN系列。</p>
-<h3 id="2-R-CNN"><a href="#2-R-CNN" class="headerlink" title="2.R-CNN"></a>2.R-CNN</h3><p>RCNN的过程分4个阶段：</p>
-<ol>
-<li>候选区域提出阶段（Proposal）：采用selective-search方法，从一幅图像生成1K~2K个候选区域；</li>
-<li>特征提取：对每个候选区域，使用CNN进行特征提取；</li>
-<li>分类：每个候选区域的特征放入分类器SVM，得到该候选区域的分类结果；</li>
-<li>回归：候选区域的特征放入回归器，得到bbox的修正量。</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -992,173 +689,11 @@
   </article>
 
 
-    
-      
 
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/30/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Infinity">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/profile.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Infinity's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/30/hello-world/" itemprop="url">Hello World</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-30T15:01:35+08:00">
-                2019-12-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-            <div class="post-wordcount">
-              
-                
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Words count in article&#58;</span>
-                
-                <span title="Words count in article">
-                  73
-                </span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Reading time &asymp;</span>
-                
-                <span title="Reading time">
-                  1
-                </span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-          
-        
+    <div class="post-spread">
       
     </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
   </div>
-  
-  
-  
-  </article>
-
-
-    
-  </section>
-
-  
 
 
           </div>
@@ -1166,6 +701,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -1186,8 +725,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -1267,6 +815,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-Model"><span class="nav-number">1.</span> <span class="nav-text">1 Model</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-Training"><span class="nav-number">2.</span> <span class="nav-text">2 Training</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-Matching-strategy"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Matching strategy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-Training-objective"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 Training objective</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-Choosing-scales-and-aspect-ratios-for-default-boxes"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 Choosing scales and aspect ratios for default boxes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-Hard-negative-mining"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 Hard negative mining</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-Data-augmentation"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 Data augmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-6-训练流程"><span class="nav-number">2.6.</span> <span class="nav-text">2.6 训练流程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-Inference"><span class="nav-number">3.</span> <span class="nav-text">3 Inference</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-Experimental-Results"><span class="nav-number">4.</span> <span class="nav-text">4 Experimental Results</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-PASCAL-VOC"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 PASCAL VOC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-Model-analysis"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 Model analysis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-MS-COCO"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 MS COCO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4-Data-Augmentation-for-Small-Object-Accurac"><span class="nav-number">4.4.</span> <span class="nav-text">4.4 Data Augmentation for Small Object Accurac</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-5-Inference-time"><span class="nav-number">4.5.</span> <span class="nav-text">4.5 Inference time</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-可能的改进方向"><span class="nav-number">5.</span> <span class="nav-text">5 可能的改进方向</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -1418,6 +982,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
