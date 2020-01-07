@@ -474,18 +474,22 @@
 <li>SSD是在多个feature map上进行的多尺度（multi-scale）预测（每个feature map预测一种 scale）。而YOLO是只在一个feature map上进行 多尺度预测。 两种方案的对比还可以从下面两张图中对比，这图是从FPN的论文里找的。</li>
 <li>SSD中用于预测的层也就是 detector/classifier 是全卷积的（上图中没有显示detector，后面有图示），而YOLO中是全连接的。</li>
 </ul>
+<div class="table-container">
 <table>
 <thead>
 <tr>
-<th align="center"><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1521700272907.png" alt="1521700272907"></th>
-<th align="center"><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1521700285286.png" alt="1521700285286"></th>
+<th style="text-align:center"><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1521700272907.png" alt="1521700272907"></th>
+<th style="text-align:center"><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1521700285286.png" alt="1521700285286"></th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="center"><strong>YOLO</strong></td>
-<td align="center"><strong>SSD</strong></td>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>YOLO</strong></td>
+<td style="text-align:center"><strong>SSD</strong></td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <p>上面的模型结构图可能看着不清楚，看下面这个图[参考资料2]，这个是 inference 时 模型从一张图片中提取目标的过程。</p>
 <p><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1521723003643.png" alt="1521723003643"></p>
 <p>再总结一下，网络模型的主要特征：</p>
@@ -519,7 +523,7 @@
 <p><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1522221137339-1542376332162.png" alt="1522221137339"></p>
 <ul>
 <li>$l$ 代表预测bounding box与default box之间的变换关系，  $g$ 代表的是ground truth box与default box之间的变换关系。</li>
-<li>$x_{ij}^p={0,1}$  代表 第 i 个default box 与类别 p 的 第 j 个ground truth box 是否匹配，匹配为1，否则为0；</li>
+<li>$x_{ij}^p=\{0,1\}$  代表 第 i 个default box 与类别 p 的 第 j 个ground truth box 是否匹配，匹配为1，否则为0；</li>
 </ul>
 <p>分类损失，softmax loss，交叉熵损失：</p>
 <p><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1522221535577-1542376342621.png" alt="1522221535577"></p>
@@ -549,9 +553,13 @@
 <li>每个feature layer都负责对不同面积大小的目标进行预测。</li>
 </ul>
 <p>但是我们知道目标不仅有大小之分，长宽比也是有变化的，即便两个目标大小是接近的，他们的长宽比（aspect ratio）也有可能是不同的，也即不可能也不应该把所有的目标都当成正方形的形状。那aspect ratio怎么确定呢？</p>
-<p>这里与Faster R-CNN中的解决方法是一样的：也是人为设定几种 aspect ratio，SSD中设定的几种aspect ratio分别是 ${1,2,3，{1\over2},{1\over3}}$ ，然后根据scale和aspect ratio 就可以计算出default box真实的宽和高了，如下两式：<br>$$<br>w^a_k=s_k \sqrt{a_r} \<br>h^a_k=s_k/\sqrt{a_r}<br>$$<br>这样对于feature layer上的每个cell都有5个不同比例的default box，然后作者在 aspect ratio=1 时，又添加了一种scale， 即 $s^{\prime}<em>{k}=\sqrt{s_k s</em>{k+1}}$  ,这样一来每个cell就有6个不同的default box。</p>
-<p>那么default box的中心坐标怎么确定呢？如下：<br>$$<br>\left( \frac{i+0.5}{\vert f_k \vert}, \frac{j+0.5}{\vert f_k \vert} \right)<br>$$</p>
-<ul>
+<p>这里与Faster R-CNN中的解决方法是一样的：也是人为设定几种 aspect ratio，SSD中设定的几种aspect ratio分别是 $\{1,2,3，{1\over2},{1\over3}\}$ ，然后根据scale和aspect ratio 就可以计算出default box真实的宽和高了，如下两式：</p>
+<script type="math/tex; mode=display">
+w^a_k=s_k \sqrt{a_r} \\
+h^a_k=s_k/\sqrt{a_r}</script><p>这样对于feature layer上的每个cell都有5个不同比例的default box，然后作者在 aspect ratio=1 时，又添加了一种scale， 即 $s^{\prime}_{k}=\sqrt{s_k s_{k+1}}$  ,这样一来每个cell就有6个不同的default box。</p>
+<p>那么default box的中心坐标怎么确定呢？如下：</p>
+<script type="math/tex; mode=display">
+\left( \frac{i+0.5}{\vert f_k \vert}, \frac{j+0.5}{\vert f_k \vert} \right)</script><ul>
 <li><p>$|f_k|$  是第k个square feature map 的大小</p>
 </li>
 <li><p>$i，j\in [0,|f_k|]$，这个公式是一个归一化坐标，最终会映射到原图上，以确定原图上对应的区域。之所以加0.5是为了把default box的中心设在与之关联的cell的中心，如下图</p>
@@ -640,7 +648,7 @@
 </ul>
 <h2 id="4-5-Inference-time"><a href="#4-5-Inference-time" class="headerlink" title="4.5 Inference time"></a>4.5 Inference time</h2><p><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1522234958698.png" alt="1522234958698"></p>
 <ul>
-<li>We measure the speed with batch size 8 using Titan X and cuDNN v4 with Intel Xeon <a href="mailto:E5-2667v3@3.20GHz">E5-2667v3@3.20GHz</a> </li>
+<li>We measure the speed with batch size 8 using Titan X and cuDNN v4 with Intel Xeon E5-2667v3@3.20GHz </li>
 <li>Note that about 80% of the forward time is spent on the base network (VGG16 in our case). Therefore, using a faster base network could even further improve the speed, which can possibly make the SSD512 model real-time as well 。</li>
 </ul>
 <h1 id="5-可能的改进方向"><a href="#5-可能的改进方向" class="headerlink" title="5 可能的改进方向"></a>5 可能的改进方向</h1><ul>
@@ -655,7 +663,7 @@
 </ul>
 <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ol>
 <li><a href="http://blog.csdn.net/Jesse_Mx/article/details/74011886" target="_blank" rel="noopener">SSD: Single Shot MultiBox Detector 模型fine-tune和网络架构</a></li>
-<li><a href="https://docs.google.com/presentation/d/1rtfeV_VmdGdZD5ObVVpPDPIODSDxKnFSU0bsN_rgZXc/pub?start=false&loop=false&delayms=3000&slide=id.g179f601b72_0_51" target="_blank" rel="noopener">一个很棒的讲解SSD的PPT</a> </li>
+<li><a href="https://docs.google.com/presentation/d/1rtfeV_VmdGdZD5ObVVpPDPIODSDxKnFSU0bsN_rgZXc/pub?start=false&amp;loop=false&amp;delayms=3000&amp;slide=id.g179f601b72_0_51" target="_blank" rel="noopener">一个很棒的讲解SSD的PPT</a> </li>
 <li><a href="https://handong1587.github.io/deep_learning/2015/10/09/object-detection.html" target="_blank" rel="noopener">一个汇集了很多目标检测模型的博客</a> </li>
 <li><a href="https://www.zhihu.com/question/49630217" target="_blank" rel="noopener">知乎：atrous convolution是什么？</a></li>
 </ol>
@@ -689,8 +697,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/12/30/Fast-RCNN/" rel="next" title="Fast RCNN">
-                <i class="fa fa-chevron-left"></i> Fast RCNN
+              <a href="/2019/12/30/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
               </a>
             
           </div>
@@ -699,8 +707,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2020/01/07/Learning-Faster-RCNN/" rel="prev" title="Learning-Faster-RCNN">
-                Learning-Faster-RCNN <i class="fa fa-chevron-right"></i>
+              <a href="/2020/01/07/Faster-RCNN/" rel="prev" title="Faster RCNN">
+                Faster RCNN <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -894,7 +902,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">5.5k</span>
+    <span title="Site words total count">9.1k</span>
   
 </div>
 
@@ -1416,7 +1424,24 @@
   
 
   <script type="text/javascript" src="/lib/clipboard/clipboard.js"></script>
-<script type="text/javascript" src="/js/src/custom.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+<script type="text/javascript" src="/js/src/custom.js"></script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config("");
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
 
 </body>
 </html>

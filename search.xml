@@ -1,11 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Learning-Faster-RCNN</title>
-    <url>/2020/01/07/Learning-Faster-RCNN/</url>
-    <content><![CDATA[<p>经过R-CNN和Fast RCNN的积淀，Ross B. Girshick在2016年提出了新的Faster RCNN，在结构上，Faster RCNN已经将特征抽取(feature extraction)，proposal提取，bounding box regression(rect refine)，classification都整合在了一个网络中，使得综合性能有较大提高，在检测速度方面尤为明显。</p>
-<p><img src="/Users/wtb/work/myblogs/hexo_blogs/source/_posts/Learning-Faster-RCNN/v2-c0172be282021a1029f7b72b51079ffe_hd-20200107100227016.jpg" alt="img"></p>
+    <title>Fast RCNN</title>
+    <url>/2020/01/07/Fast-RCNN/</url>
+    <content><![CDATA[<h3 id="1-前言"><a href="#1-前言" class="headerlink" title="1.前言"></a>1.前言</h3><p>物体检测（object detection）是计算机视觉非常重要的一个领域。在深度学习出现之前，传统方法始终无法处理好物体检测问题，在深度学习方法引入之后，物体检测领域发生了翻天覆地的变化。最著名的是RCNN系列，另外还有YOLO、SSD。这篇文章首先介绍RCNN系列。</p>
+<h3 id="2-R-CNN"><a href="#2-R-CNN" class="headerlink" title="2.R-CNN"></a>2.R-CNN</h3><p>RCNN的过程分4个阶段：</p>
+<ol>
+<li>候选区域提出阶段（Proposal）：采用selective-search方法，从一幅图像生成1K~2K个候选区域；</li>
+<li>特征提取：对每个候选区域，使用CNN进行特征提取；</li>
+<li>分类：每个候选区域的特征放入分类器SVM，得到该候选区域的分类结果；</li>
+<li>回归：候选区域的特征放入回归器，得到bbox的修正量。</li>
+</ol>
 ]]></content>
+      <categories>
+        <category>Deep learning</category>
+      </categories>
+      <tags>
+        <tag>Deep learning</tag>
+        <tag>Target detection</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Faster RCNN</title>
+    <url>/2020/01/07/Faster-RCNN/</url>
+    <content><![CDATA[<blockquote>
+<p>Faster-RCNN 可参考文章：</p>
+<p><a href="https://zhuanlan.zhihu.com/p/32404424" target="_blank" rel="noopener">从编程实现角度学习Faster R-CNN（附极简实现）</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/24916624" target="_blank" rel="noopener">知乎专栏：Faster R-CNN</a> </p>
+<p>本文转载自：<a href="https://zhuanlan.zhihu.com/p/31426458" target="_blank" rel="noopener">一文读懂Faster RCNN</a></p>
+</blockquote>
+<p>&emsp;&emsp;经过R-CNN和Fast RCNN的积淀，Ross B. Girshick在2016年提出了新的Faster RCNN，在结构上，Faster RCNN已经将特征抽取(feature extraction)，proposal提取，bounding box regression(rect refine)，classification都整合在了一个网络中，使得综合性能有较大提高，在检测速度方面尤为明显。</p>
+<p><img src="/2020/01/07/Faster-RCNN/v2-c0172be282021a1029f7b72b51079ffe_hd-20200107104117436.jpg" alt="图1 Faster RCNN基本结构（来自原论文）"></p>
+ <center> 图1 Faster RCNN基本结构（来自原论文）</center>
+
+<p>依作者看来，如图1，Faster RCNN其实可以分为4个主要内容：</p>
+<ol>
+<li>Conv layers。作为一种CNN网络目标检测方法，Faster RCNN首先使用一组基础的conv+relu+pooling层提取image的feature maps。该feature maps被共享用于后续RPN层和全连接层。</li>
+<li>Region Proposal Networks。RPN网络用于生成region proposals。该层通过softmax判断anchors属于positive或者negative，再利用bounding box regression修正anchors获得精确的proposals。</li>
+<li>Roi Pooling。该层收集输入的feature maps和proposals，综合这些信息后提取proposal feature maps，送入后续全连接层判定目标类别。</li>
+<li>Classification。利用proposal feature maps计算proposal的类别，同时再次bounding box regression获得检测框最终的精确位置。</li>
+</ol>
+<p>所以本文以上述4个内容作为切入点介绍Faster R-CNN网络。</p>
+<p>&emsp;&emsp;图2展示了python版本中的VGG16模型中的faster_rcnn_test.pt的网络结构，可以清晰的看到该网络对于一副任意大小PxQ的图像，首先缩放至固定大小MxN，然后将MxN图像送入网络；而Conv layers中包含了13个conv层+13个relu层+4个pooling层；RPN网络首先经过3x3卷积，再分别生成positive anchors和对应bounding box regression偏移量，然后计算出proposals；而Roi Pooling层则利用proposals从feature maps中提取proposal feature送入后续全连接和softmax网络作classification（即分类proposal到底是什么object）。</p>
+<p><img src="/2020/01/07/Faster-RCNN/v2-e64a99b38f411c337f538eb5f093bdf3_r-20200107104233642.jpg" alt="img"></p>
+<center>图2 faster_rcnn_test.pt网络结构 （pascal_voc/VGG16/faster_rcnn_alt_opt/faster_rcnn_test.pt）</center>
+
+<h1 id="Conv-layers"><a href="#Conv-layers" class="headerlink" title="Conv layers"></a>Conv layers</h1><p>&emsp;&emsp;Conv layers包含了conv，pooling，relu三种层。以python版本中的VGG16模型中的faster_rcnn_test.pt的网络结构为例，如图2，Conv layers部分共有13个conv层，13个relu层，4个pooling层。这里有一个非常容易被忽略但是又无比重要的信息，在Conv layers中：</p>
+<ol>
+<li>所有的conv层都是：kernel_size=3，pad=1，stride=1</li>
+<li>所有的pooling层都是：kernel_size=2，pad=1，stride=1</li>
+</ol>
+<p>&emsp;&emsp;为何重要？在Faster RCNN Conv layers中对所有的卷积都做了扩边处理（ pad=1，即填充一圈0），导致原图变为 (M+2)x(N+2)大小，再做3x3卷积后输出MxN 。正是这种设置，导致Conv layers中的conv层不改变输入和输出矩阵大小。如图3：</p>
+<p><img src="/2020/01/07/Faster-RCNN/v2-3c772e9ed555eb86a97ef9c08bf563c9_r.jpg" alt="img"></p>
+<center>图3 卷积示意图</center>
+
+<p>&emsp;&emsp;类似的是，Conv layers中的pooling层kernel_size=2，stride=2。这样每个经过pooling层的MxN矩阵，都会变为(M/2)x(N/2)大小。综上所述，在整个Conv layers中，conv和relu层不改变输入输出大小，只有pooling层使输出长宽都变为输入的1/2。</p>
+<p>&emsp;&emsp;那么，一个MxN大小的矩阵经过Conv layers固定变为(M/16)x(N/16)！这样Conv layers生成的feature map中都可以和原图对应起来。  </p>
+<h1 id="Region-Proposal-Networks-RPN"><a href="#Region-Proposal-Networks-RPN" class="headerlink" title="Region Proposal Networks(RPN)"></a>Region Proposal Networks(RPN)</h1><h2 id="多通道图像卷积基础知识介绍"><a href="#多通道图像卷积基础知识介绍" class="headerlink" title="多通道图像卷积基础知识介绍"></a>多通道图像卷积基础知识介绍</h2><p>在介绍RPN前，还要多解释几句基础知识，已经懂的看官老爷跳过就好。</p>
+<ol>
+<li>对于单通道图像+单卷积核做卷积，第一章中的图3已经展示了；</li>
+<li>对于多通道图像+多卷积核做卷积，计算方式如下：</li>
+</ol>
+<p><img src="/2020/01/07/Faster-RCNN/v2-8d72777321cbf1336b79d839b6c7f9fc_r.jpg" alt="img"></p>
+<center>图5 多通道卷积计算方式</center>
+
+<p>如图5，输入有3个通道，同时有2个卷积核。对于每个卷积核，先在输入3个通道分别作卷积，再将3个通道结果加起来得到卷积输出。所以对于某个卷积层，无论输入图像有多少个通道，输出图像通道数总是等于卷积核数量！</p>
+<p>对多通道图像做1x1卷积，其实就是将输入图像于每个通道乘以卷积系数后加在一起，即相当于把原图像中本来各个独立的通道“联通”在了一起。</p>
+<h2 id="anchors"><a href="#anchors" class="headerlink" title="anchors"></a>anchors</h2><p>提到RPN网络，就不能不说anchors。所谓anchors，实际上就是一组由rpn/generate_anchors.py生成的矩形。直接运行作者demo中的generate_anchors.py可以得到以下输出：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[[ -84.  -40.   99.   55.]</span><br><span class="line"> [-176.  -88.  191.  103.]</span><br><span class="line"> [-360. -184.  375.  199.]</span><br><span class="line"> [ -56.  -56.   71.   71.]</span><br><span class="line"> [-120. -120.  135.  135.]</span><br><span class="line"> [-248. -248.  263.  263.]</span><br><span class="line"> [ -36.  -80.   51.   95.]</span><br><span class="line"> [ -80. -168.   95.  183.]</span><br><span class="line"> [-168. -344.  183.  359.]]</span><br></pre></td></tr></table></figure>
+<p>其中每行的4个值$\left(x_{1}, y_{1}, x_{2}, y_{2}\right)$表矩形左上和右下角点坐标。9个矩形共有3种形状，长宽比为大约为$\text { width:height } \in\{1: 1,1: 2,2: 1\}$三种，如图6。实际上通过anchors就引入了检测中常用到的多尺度方法。</p>
+<p><img src="/2020/01/07/Faster-RCNN/v2-7abead97efcc46a3ee5b030a2151643f_hd.jpg" alt="img"></p>
+<center>图6 anchors示意图</center>
+
+<p>注：关于上面的anchors size，其实是根据检测图像设置的。在python demo中，会把任意大小的输入图像reshape成800x600（即图2中的M=800，N=600）。再回头来看anchors的大小，anchors中长宽1:2中最大为352x704，长宽2:1中最大736x384，基本是cover了800x600的各个尺度和形状。</p>
+<p>那么这9个anchors是做什么的呢？借用Faster RCNN论文中的原图，如图7，遍历Conv layers计算获得的feature maps，为每一个点都配备这9种anchors作为初始的检测框。这样做获得检测框很不准确，不用担心，后面还有2次bounding box regression可以修正检测框位置。</p>
+<p><img src="/2020/01/07/Faster-RCNN/v2-c93db71cc8f4f4fd8cfb4ef2e2cef4f4_hd.jpg" alt="img"></p>
+<center>图7</center>
+
+<p>解释一下上面这张图的数字。</p>
+<ol>
+<li>在原文中使用的是ZF model中，其Conv Layers中最后的conv5层num_output=256，对应生成256张特征图，所以相当于feature map每个点都是256-dimensions</li>
+<li>在conv5之后，做了rpn_conv/3x3卷积且num_output=256，相当于每个点又融合了周围3x3的空间信息（猜测这样做也许更鲁棒？反正我没测试），同时256-d不变（如图4和图7中的红框）</li>
+<li>假设在conv5 feature map中每个点上有k个anchor（默认k=9），而每个anhcor要分positive和negative，所以每个点由256d feature转化为cls=2k scores；而每个anchor都有(x, y, w, h)对应4个偏移量，所以reg=4k coordinates</li>
+<li>补充一点，全部anchors拿去训练太多了，训练程序会在合适的anchors中<strong>随机</strong>选取128个postive anchors+128个negative anchors进行训练（什么是合适的anchors下文5.1有解释）</li>
+</ol>
+<p>注意，在本文讲解中使用的VGG conv5 num_output=512，所以是512d，其他类似。</p>
+<p><strong>其实RPN最终就是在原图尺度上，设置了密密麻麻的候选Anchor。然后用cnn去判断哪些Anchor是里面有目标的positive anchor，哪些是没目标的negative anchor。所以，仅仅是个二分类而已！</strong></p>
+<p>那么Anchor一共有多少个？原图800x600，VGG下采样16倍，feature map每个点设置9个Anchor，所以：</p>
+<p>$\operatorname{ceil}(800 / 16) \times \operatorname{ceil}(600 / 16) \times 9=50 \times 38 \times 9=17100$</p>
+<p>其中ceil()表示向上取整，是因为VGG输出的feature map size= 50*38。</p>
+<p><img src="/2020/01/07/Faster-RCNN/v2-4b15828dfee19be726835b671748cc4d_r.jpg" alt="img"></p>
+<center>图8 Gernerate Anchors</center>
+
+<h2 id="softmax判定positive与negative"><a href="#softmax判定positive与negative" class="headerlink" title="softmax判定positive与negative"></a>softmax判定positive与negative</h2><p>一副MxN大小的矩阵送入Faster RCNN网络后，到RPN网络变为(M/16)x(N/16)，不妨设 W=M/16，H=N/16。在进入reshape与softmax之前，先做了1x1卷积，如图9：</p>
+<p><img src="/2020/01/07/Faster-RCNN/v2-1ab4b6c3dd607a5035b5203c76b078f3_r.jpg" alt="img"></p>
+<center>图9 RPN中判定positive/negative网络结构</center>
+
+<p>该1x1卷积的caffe prototxt定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">layer &#123;</span><br><span class="line">  name: &quot;rpn_cls_score&quot;</span><br><span class="line">  type: &quot;Convolution&quot;</span><br><span class="line">  bottom: &quot;rpn&#x2F;output&quot;</span><br><span class="line">  top: &quot;rpn_cls_score&quot;</span><br><span class="line">  convolution_param &#123;</span><br><span class="line">    num_output: 18   # 2(positive&#x2F;negative) * 9(anchors)</span><br><span class="line">    kernel_size: 1 pad: 0 stride: 1</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>可以看到其num_output=18，也就是经过该卷积的输出图像为WxHx18大小（注意第二章开头提到的卷积计算方式）。这也就刚好对应了feature maps每一个点都有9个anchors，同时每个anchors又有可能是positive和negative，所有这些信息都保存WxHx(9*2)大小的矩阵。为何这样做？后面接softmax分类获得positive anchors，也就相当于初步提取了检测目标候选区域box（一般认为目标在positive anchors中）。</strong></p>
+<p>那么为何要在softmax前后都接一个reshape layer？其实只是为了便于softmax分类，至于具体原因这就要从caffe的实现形式说起了。在caffe基本数据结构blob中以如下形式保存数据：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">blob&#x3D;[batch_size, channel，height，width]</span><br></pre></td></tr></table></figure>
+<p>对应至上面的保存positive/negative anchors的矩阵，其在caffe blob中的存储形式为[1, 2x9, H, W]。而在softmax分类时需要进行positive/negative二分类，所以reshape layer会将其变为[1, 2, 9xH, W]大小，即单独“腾空”出来一个维度以便softmax分类，之后再reshape回复原状。贴一段caffe softmax_loss_layer.cpp的reshape函数的解释，非常精辟：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="string">"Number of labels must match number of predictions; "</span></span><br><span class="line"><span class="string">"e.g., if softmax axis == 1 and prediction shape is (N, C, H, W), "</span></span><br><span class="line"><span class="string">"label count (number of labels) must be N*H*W, "</span></span><br><span class="line"><span class="string">"with integer values in &#123;0, 1, ..., C-1&#125;."</span>;</span><br></pre></td></tr></table></figure>
+<p>综上所述，RPN网络中利用anchors和softmax初步提取出positive anchors作为候选区域（另外也有实现用sigmoid代替softmax，原理类似）。</p>
+<h2 id="bounding-box-regression原理"><a href="#bounding-box-regression原理" class="headerlink" title="bounding box regression原理"></a>bounding box regression原理</h2><p>如图9所示绿色框为飞机的Ground Truth(GT)，红色为提取的positive anchors，即便红色的框被分类器识别为飞机，但是由于红色的框定位不准，这张图相当于没有正确的检测出飞机。所以我们希望采用一种方法对红色的框进行微调，使得positive anchors和GT更加接近。</p>
+<p><img src="/2020/01/07/Faster-RCNN/v2-93021a3c03d66456150efa1da95416d3_hd.jpg" alt="img"></p>
+<center>图10</center>
+
+<p>对于窗口一般使用四维向量 $(x, y, w, h)$表示，分别表示窗口的中心点坐标和宽高。对于图 11，红色的框A代表原始的positive Anchors，绿色的框G代表目标的GT，我们的目标是寻找一种关系，使得输入原始的anchor A经过映射得到一个跟真实窗口G更接近的回归窗口G’，即：</p>
+<ul>
+<li>给定anchor $A=\left(A_{x}, A_{y}, A_{w}, A_{h}\right)$和 $G T=\left[G_{x}, G_{y}, G_{w}, G_{h}\right]$</li>
+<li>寻找一种变换<strong>F，</strong>使得：$F\left(A_{x}, A_{y}, A_{w}, A_{h}\right)=\left(G_{x}^{\prime}, G_{y}^{\prime}, G_{w}^{\prime}, G_{h}^{\prime}\right)$ , 其中$\left(G_{x}^{\prime}, G_{y}^{\prime}, G_{w}^{\prime}, G_{h}^{\prime}\right) \approx\left(G_{x}, G_{y}, G_{w}, G_{h}\right)$ </li>
+</ul>
+<p><img src="/2020/01/07/Faster-RCNN/v2-ea7e6e48662bfa68ec73bdf32f36bb85_hd.jpg" alt="img"></p>
+<center>图11</center>
+
+<p>那么经过何种变换<strong>F</strong>才能从图10中的anchor A变为G’呢？ 比较简单的思路就是:</p>
+<ul>
+<li><p>先做平移</p>
+<script type="math/tex; mode=display">G_{x}^{\prime}=A_{w} \cdot d_{x}(A)+A_{x}</script><script type="math/tex; mode=display">G_{y}^{\prime}=A_{h} \cdot d_{y}(A)+A_{y}</script></li>
+<li><p>再做缩放</p>
+<script type="math/tex; mode=display">G_{w}^{\prime}=A_{w} \cdot \exp \left(d_{w}(A)\right)</script><script type="math/tex; mode=display">G_{h}^{\prime}=A_{h} \cdot \exp \left(d_{h}(A)\right)</script></li>
+</ul>
+<p>观察上面4个公式发现，需要学习的是 $d_{x}(A), d_{y}(A), d_{w}(A), d_{h}(A)$ 这四个变换。当输入的anchor A与GT相差较小时，可以认为这种变换是一种线性变换， 那么就可以用线性回归来建模对窗口进行微调（注意，只有当anchors A和GT比较接近时，才能使用线性回归模型，否则就是复杂的非线性问题了）。</p>
+<p>接下来的问题就是如何通过线性回归获得$d_{x}(A), d_{y}(A), d_{w}(A), d_{h}(A)$ 了。线性回归就是给定输入的特征向量X, 学习一组参数W, 使得经过线性回归后的值跟真实值Y非常接近，即$Y=W X$。对于该问题，输入X是cnn feature map，定义为Φ；同时还有训练传入A与GT之间的变换量，即$\left(t_{x}, t_{y}, t_{w}, t_{h}\right)$。输出是$d_{x}(A), d_{y}(A), d_{w}(A), d_{h}(A)$ 四个变换。那么目标函数可以表示为：</p>
+<script type="math/tex; mode=display">d_{*}(A)=W_{*}^{T} \cdot \phi(A)</script><p>其中$\phi(A)$ 是对应anchor的feature map组成的特征向量， $W_{\ast }$ 是需要学习的参数， $d_{\ast } (A)$ 是得到的预测值（<em>表示 x，y，w，h，也就是每一个变换对应一个上述目标函数</em>）。为了让预测值与 $ d_{\ast } (A)$ 真实值$t_{\ast}$ 差距最小，设计L1损失函数：</p>
+<script type="math/tex; mode=display">\text { Loss }=\sum_{i}^{N}\left|t_{\ast }^{i}-W_{\ast }^{T} \cdot \phi\left(A^{i}\right)\right|</script><p>函数优化目标为：</p>
+<script type="math/tex; mode=display">
+\hat{W}_{\ast}=\operatorname{argmin}_{W_{\ast}} \sum_{i}^{n}\left|t_{\ast}^{i}-W_{\ast}^{T} \cdot \phi\left(A^{i}\right)\right|+\lambda\left\|W_{\ast}\right\|</script><p>为了方便描述，这里以L1损失为例介绍，而真实情况中一般使用soomth-L1损失。</p>
+<p>需要说明，只有在GT与需要回归框位置比较接近时，才可近似认为上述线性变换成立。<br>说完原理，对应于Faster RCNN原文，positive anchor与ground truth之间的平移量$\left(t_{x}, t_{y}\right)$ 与尺度因子$\left(t_{w}, t_{h}\right)$ 如下：</p>
+<script type="math/tex; mode=display">\begin{array}{rl}{t_{x}=\left(x-x_{a}\right) / w_{a}} & {t_{y}=\left(y-y_{a}\right) / h_{a}} \\ {t_{w}=\log \left(w / w_{a}\right)} & {t_{h}=\log \left(h / h_{a}\right)}\end{array}</script><p>对于训练bouding box regression网络回归分支，输入是cnn feature Φ，监督信号是Anchor与GT的差距 $\left(t_{x}, t_{y}, t_{w}, t_{h}\right)$ ，即训练目标是：输入 Φ的情况下使网络输出与监督信号尽可能接近。那么当bouding box regression工作时，再输入Φ时，回归网络分支的输出就是每个Anchor的平移量和变换尺度 $\left(t_{x}, t_{y}, t_{w}, t_{h}\right)$ ，显然即可用来修正Anchor位置了。</p>
+<h2 id="对proposals进行bounding-box-regression"><a href="#对proposals进行bounding-box-regression" class="headerlink" title="对proposals进行bounding box regression"></a>对proposals进行bounding box regression</h2><p>在了解bounding box regression后，再回头来看RPN网络第二条线路，如图12。</p>
+<p><img src="https://pic3.zhimg.com/80/v2-8241c8076d60156248916fe2f1a5674a_hd.jpg" alt="img"></p>
+<center>图12 RPN中的bbox reg</center>
+
+<p>先来看一看上图11中1x1卷积的caffe prototxt定义：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">layer &#123;</span><br><span class="line">  name: &quot;rpn_bbox_pred&quot;</span><br><span class="line">  type: &quot;Convolution&quot;</span><br><span class="line">  bottom: &quot;rpn&#x2F;output&quot;</span><br><span class="line">  top: &quot;rpn_bbox_pred&quot;</span><br><span class="line">  convolution_param &#123;</span><br><span class="line">    num_output: 36   # 4 * 9(anchors)</span><br><span class="line">    kernel_size: 1 pad: 0 stride: 1</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到其 num_output=36，即经过该卷积输出图像为WxHx36，在caffe blob存储为[1, 4x9, H, W]，这里相当于feature maps每个点都有9个anchors，每个anchors又都有4个用于回归的</p>
+<script type="math/tex; mode=display">\left[d_{\varpi}(A), d_{y}(A), d_{w}(A), d_{h}(A)\right]</script><p>变换量。</p>
+<p>回到图8，VGG输出 $50<em>38</em>512$ 的特征，对应设置 $50<em>38</em>k$ 个anchors，而RPN输出：</p>
+<ol>
+<li>大小为 $50<em>38</em>2k$ 的positive/negative softmax分类特征矩阵</li>
+<li>大小为  $50<em>38</em>4k$ 的regression坐标回归特征矩阵</li>
+</ol>
+<p>恰好满足RPN完成positive/negative分类+bounding box regression坐标回归。</p>
+<h2 id="Proposal-Layer"><a href="#Proposal-Layer" class="headerlink" title="Proposal Layer"></a>Proposal Layer</h2><p>Proposal Layer负责综合所有 $\left[d_{\varpi}(A), d_{y}(A), d_{w}(A), d_{h}(A)\right]$ 变换量和positive anchors，计算出精准的proposal，送入后续RoI Pooling Layer。还是先来看看Proposal Layer的caffe prototxt定义：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">layer &#123;</span><br><span class="line">  name: &#39;proposal&#39;</span><br><span class="line">  type: &#39;Python&#39;</span><br><span class="line">  bottom: &#39;rpn_cls_prob_reshape&#39;</span><br><span class="line">  bottom: &#39;rpn_bbox_pred&#39;</span><br><span class="line">  bottom: &#39;im_info&#39;</span><br><span class="line">  top: &#39;rois&#39;</span><br><span class="line">  python_param &#123;</span><br><span class="line">    module: &#39;rpn.proposal_layer&#39;</span><br><span class="line">    layer: &#39;ProposalLayer&#39;</span><br><span class="line">    param_str: &quot;&#39;feat_stride&#39;: 16&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>Deep learning</category>
+      </categories>
+      <tags>
+        <tag>Deep learning</tag>
+        <tag>Target detection</tag>
+      </tags>
   </entry>
   <entry>
     <title>目标检测 SSD 论文笔记</title>
@@ -38,18 +186,22 @@
 <li>SSD是在多个feature map上进行的多尺度（multi-scale）预测（每个feature map预测一种 scale）。而YOLO是只在一个feature map上进行 多尺度预测。 两种方案的对比还可以从下面两张图中对比，这图是从FPN的论文里找的。</li>
 <li>SSD中用于预测的层也就是 detector/classifier 是全卷积的（上图中没有显示detector，后面有图示），而YOLO中是全连接的。</li>
 </ul>
+<div class="table-container">
 <table>
 <thead>
 <tr>
-<th align="center"><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1521700272907.png" alt="1521700272907"></th>
-<th align="center"><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1521700285286.png" alt="1521700285286"></th>
+<th style="text-align:center"><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1521700272907.png" alt="1521700272907"></th>
+<th style="text-align:center"><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1521700285286.png" alt="1521700285286"></th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="center"><strong>YOLO</strong></td>
-<td align="center"><strong>SSD</strong></td>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>YOLO</strong></td>
+<td style="text-align:center"><strong>SSD</strong></td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <p>上面的模型结构图可能看着不清楚，看下面这个图[参考资料2]，这个是 inference 时 模型从一张图片中提取目标的过程。</p>
 <p><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1521723003643.png" alt="1521723003643"></p>
 <p>再总结一下，网络模型的主要特征：</p>
@@ -83,7 +235,7 @@
 <p><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1522221137339-1542376332162.png" alt="1522221137339"></p>
 <ul>
 <li>$l$ 代表预测bounding box与default box之间的变换关系，  $g$ 代表的是ground truth box与default box之间的变换关系。</li>
-<li>$x_{ij}^p={0,1}$  代表 第 i 个default box 与类别 p 的 第 j 个ground truth box 是否匹配，匹配为1，否则为0；</li>
+<li>$x_{ij}^p=\{0,1\}$  代表 第 i 个default box 与类别 p 的 第 j 个ground truth box 是否匹配，匹配为1，否则为0；</li>
 </ul>
 <p>分类损失，softmax loss，交叉熵损失：</p>
 <p><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1522221535577-1542376342621.png" alt="1522221535577"></p>
@@ -113,9 +265,13 @@
 <li>每个feature layer都负责对不同面积大小的目标进行预测。</li>
 </ul>
 <p>但是我们知道目标不仅有大小之分，长宽比也是有变化的，即便两个目标大小是接近的，他们的长宽比（aspect ratio）也有可能是不同的，也即不可能也不应该把所有的目标都当成正方形的形状。那aspect ratio怎么确定呢？</p>
-<p>这里与Faster R-CNN中的解决方法是一样的：也是人为设定几种 aspect ratio，SSD中设定的几种aspect ratio分别是 ${1,2,3，{1\over2},{1\over3}}$ ，然后根据scale和aspect ratio 就可以计算出default box真实的宽和高了，如下两式：<br>$$<br>w^a_k=s_k \sqrt{a_r} \<br>h^a_k=s_k/\sqrt{a_r}<br>$$<br>这样对于feature layer上的每个cell都有5个不同比例的default box，然后作者在 aspect ratio=1 时，又添加了一种scale， 即 $s^{\prime}<em>{k}=\sqrt{s_k s</em>{k+1}}$  ,这样一来每个cell就有6个不同的default box。</p>
-<p>那么default box的中心坐标怎么确定呢？如下：<br>$$<br>\left( \frac{i+0.5}{\vert f_k \vert}, \frac{j+0.5}{\vert f_k \vert} \right)<br>$$</p>
-<ul>
+<p>这里与Faster R-CNN中的解决方法是一样的：也是人为设定几种 aspect ratio，SSD中设定的几种aspect ratio分别是 $\{1,2,3，{1\over2},{1\over3}\}$ ，然后根据scale和aspect ratio 就可以计算出default box真实的宽和高了，如下两式：</p>
+<script type="math/tex; mode=display">
+w^a_k=s_k \sqrt{a_r} \\
+h^a_k=s_k/\sqrt{a_r}</script><p>这样对于feature layer上的每个cell都有5个不同比例的default box，然后作者在 aspect ratio=1 时，又添加了一种scale， 即 $s^{\prime}_{k}=\sqrt{s_k s_{k+1}}$  ,这样一来每个cell就有6个不同的default box。</p>
+<p>那么default box的中心坐标怎么确定呢？如下：</p>
+<script type="math/tex; mode=display">
+\left( \frac{i+0.5}{\vert f_k \vert}, \frac{j+0.5}{\vert f_k \vert} \right)</script><ul>
 <li><p>$|f_k|$  是第k个square feature map 的大小</p>
 </li>
 <li><p>$i，j\in [0,|f_k|]$，这个公式是一个归一化坐标，最终会映射到原图上，以确定原图上对应的区域。之所以加0.5是为了把default box的中心设在与之关联的cell的中心，如下图</p>
@@ -204,7 +360,7 @@
 </ul>
 <h2 id="4-5-Inference-time"><a href="#4-5-Inference-time" class="headerlink" title="4.5 Inference time"></a>4.5 Inference time</h2><p><img src="/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/1522234958698.png" alt="1522234958698"></p>
 <ul>
-<li>We measure the speed with batch size 8 using Titan X and cuDNN v4 with Intel Xeon <a href="mailto:E5-2667v3@3.20GHz">E5-2667v3@3.20GHz</a> </li>
+<li>We measure the speed with batch size 8 using Titan X and cuDNN v4 with Intel Xeon E5-2667v3@3.20GHz </li>
 <li>Note that about 80% of the forward time is spent on the base network (VGG16 in our case). Therefore, using a faster base network could even further improve the speed, which can possibly make the SSD512 model real-time as well 。</li>
 </ul>
 <h1 id="5-可能的改进方向"><a href="#5-可能的改进方向" class="headerlink" title="5 可能的改进方向"></a>5 可能的改进方向</h1><ul>
@@ -219,7 +375,7 @@
 </ul>
 <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ol>
 <li><a href="http://blog.csdn.net/Jesse_Mx/article/details/74011886" target="_blank" rel="noopener">SSD: Single Shot MultiBox Detector 模型fine-tune和网络架构</a></li>
-<li><a href="https://docs.google.com/presentation/d/1rtfeV_VmdGdZD5ObVVpPDPIODSDxKnFSU0bsN_rgZXc/pub?start=false&loop=false&delayms=3000&slide=id.g179f601b72_0_51" target="_blank" rel="noopener">一个很棒的讲解SSD的PPT</a> </li>
+<li><a href="https://docs.google.com/presentation/d/1rtfeV_VmdGdZD5ObVVpPDPIODSDxKnFSU0bsN_rgZXc/pub?start=false&amp;loop=false&amp;delayms=3000&amp;slide=id.g179f601b72_0_51" target="_blank" rel="noopener">一个很棒的讲解SSD的PPT</a> </li>
 <li><a href="https://handong1587.github.io/deep_learning/2015/10/09/object-detection.html" target="_blank" rel="noopener">一个汇集了很多目标检测模型的博客</a> </li>
 <li><a href="https://www.zhihu.com/question/49630217" target="_blank" rel="noopener">知乎：atrous convolution是什么？</a></li>
 </ol>
@@ -232,40 +388,16 @@
       </tags>
   </entry>
   <entry>
-    <title>Fast RCNN</title>
-    <url>/2019/12/30/Fast-RCNN/</url>
-    <content><![CDATA[<h3 id="1-前言"><a href="#1-前言" class="headerlink" title="1.前言"></a>1.前言</h3><p>物体检测（object detection）是计算机视觉非常重要的一个领域。在深度学习出现之前，传统方法始终无法处理好物体检测问题，在深度学习方法引入之后，物体检测领域发生了翻天覆地的变化。最著名的是RCNN系列，另外还有YOLO、SSD。这篇文章首先介绍RCNN系列。</p>
-<h3 id="2-R-CNN"><a href="#2-R-CNN" class="headerlink" title="2.R-CNN"></a>2.R-CNN</h3><p>RCNN的过程分4个阶段：</p>
-<ol>
-<li>候选区域提出阶段（Proposal）：采用selective-search方法，从一幅图像生成1K~2K个候选区域；</li>
-<li>特征提取：对每个候选区域，使用CNN进行特征提取；</li>
-<li>分类：每个候选区域的特征放入分类器SVM，得到该候选区域的分类结果；</li>
-<li>回归：候选区域的特征放入回归器，得到bbox的修正量。</li>
-</ol>
-]]></content>
-      <categories>
-        <category>Deep learning</category>
-      </categories>
-      <tags>
-        <tag>Deep learning</tag>
-        <tag>segmentation</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Hello World</title>
     <url>/2019/12/30/hello-world/</url>
     <content><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
 <h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
 <p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
 <h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
 <p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
 <h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
 <p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
 <h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
 <p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
 ]]></content>
   </entry>
