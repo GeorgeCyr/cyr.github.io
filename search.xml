@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Learning-Faster-RCNN</title>
+    <url>/2020/01/07/Learning-Faster-RCNN/</url>
+    <content><![CDATA[<p>经过R-CNN和Fast RCNN的积淀，Ross B. Girshick在2016年提出了新的Faster RCNN，在结构上，Faster RCNN已经将特征抽取(feature extraction)，proposal提取，bounding box regression(rect refine)，classification都整合在了一个网络中，使得综合性能有较大提高，在检测速度方面尤为明显。</p>
+<p><img src="/Users/wtb/work/myblogs/hexo_blogs/source/_posts/Learning-Faster-RCNN/v2-c0172be282021a1029f7b72b51079ffe_hd-20200107100227016.jpg" alt="img"></p>
+]]></content>
+  </entry>
+  <entry>
     <title>目标检测 SSD 论文笔记</title>
     <url>/2020/01/02/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B-SSD-%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/</url>
     <content><![CDATA[<blockquote>
@@ -217,17 +224,6 @@
 <li><a href="https://www.zhihu.com/question/49630217" target="_blank" rel="noopener">知乎：atrous convolution是什么？</a></li>
 </ol>
 ]]></content>
-      <categories>
-        <category>Deep learning</category>
-      </categories>
-      <tags>
-        <tag>Deep learning</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Faster RCNN</title>
-    <url>/2019/12/30/Faster-RCNN/</url>
-    <content><![CDATA[<h2 id="Frist-chapter"><a href="#Frist-chapter" class="headerlink" title="Frist chapter"></a>Frist chapter</h2>]]></content>
       <categories>
         <category>Deep learning</category>
       </categories>
